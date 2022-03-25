@@ -18,7 +18,6 @@ ipcMain.handle('openProject', async (event, projPath?: string) => {
     });
   }
 
-  console.log('select proj: ', proj);
   if (!proj.canceled && proj.filePaths.length) {
     const stat = fs.statSync(proj.filePaths[0]);
     const projPath = stat.isFile() ? path.dirname(proj.filePaths[0]): proj.filePaths[0];

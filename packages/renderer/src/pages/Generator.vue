@@ -9,19 +9,18 @@
           class="project-path"
           @click="openProject"
         >
-          {{ projectPath }}
+          {{ projectName }}
         </el-button>
       </div>
     </el-aside>
     <el-main>
       <el-scrollbar height="100%">
         <div> {{ basePath }}</div>
-        <div
+        <img
           v-for="(_, idx) in materials"
           :key="idx"
+          :src="`file://${projectPath}/materials/${_}`"
         >
-          Material {{ idx }} > {{ _ }}
-        </div>
       </el-scrollbar>
     </el-main>
   </el-container>
@@ -33,13 +32,15 @@ import { ref } from 'vue';
 
 const basePath = window.location.href;
 const materials = ref<string[]>([]);
-const projectPath = ref('请选择项目...');
+const projectName = ref('请选择项目...');
+const projectPath = ref('');
 const openProject = (proj?: string) => {
   window.monobroow.openProject(proj)
     .then(proj => {
       console.log('project slected:', proj);
       if (!proj.canceled && proj.filePaths.length) {
-        projectPath.value = proj.filePaths[0].split('/').pop();
+        projectPath.value = proj.filePaths[0];
+        projectName.value = proj.filePaths[0].split('/').pop();
         materials.value = proj.filePaths
           .map((item: string, idx: number) => idx === 0 ? '' : item)
           .filter((item: string) => !!item);
