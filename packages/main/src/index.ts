@@ -1,5 +1,6 @@
 import {app} from 'electron';
 import './security-restrictions';
+import './monobroow';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 
 
@@ -65,4 +66,3 @@ if (import.meta.env.PROD) {
     .then(({autoUpdater}) => autoUpdater.checkForUpdatesAndNotify())
     .catch((e) => console.error('Failed check updates:', e));
 }
-
