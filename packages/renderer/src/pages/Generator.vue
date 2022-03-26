@@ -10,8 +10,7 @@
             <el-radio-button v-for="grp in compGroupNames" :key="grp" :label="grp" />
           </el-radio-group>
         </div>
-        <ComponentEditor v-model="componentList" class="component-editor" :image-base="materialPath"
-          :white-list="whiteList" />
+        <ComponentEditor v-model="componentList" class="component-editor" :image-base="materialPath" :white-list="whiteList" />
       </div>
     </el-header>
     <el-main>
