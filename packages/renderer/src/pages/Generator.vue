@@ -1,71 +1,124 @@
 <template>
   <el-container class="main-container">
-    <el-aside
-      class="side-nav"
-      width="240px"
-    >
-      <div>
-        <el-button
-          class="project-path"
-          @click="openProject"
-        >
-          {{ projectName }}
-        </el-button>
+    <el-header class="header-container" height="140px">
+      <div class="header-wrapper">
+        <div class="project-info">
+          <el-button class="project-path" @click="openProject">{{ projectName }}</el-button>
+        </div>
+        <div class="group-selector">
+          <el-radio-group v-model="selectedGroup" size="small" @change="updateComponentList">
+            <el-radio-button v-for="grp in compGroupNames" :key="grp" :label="grp" />
+          </el-radio-group>
+        </div>
+        <ComponentEditor v-model="componentList" class="component-editor" :image-base="materialPath"
+          :white-list="whiteList" />
       </div>
-    </el-aside>
+    </el-header>
     <el-main>
-      <el-scrollbar height="100%">
-        <div> {{ basePath }}</div>
-        <img
-          v-for="(_, idx) in materials"
-          :key="idx"
-          :src="`file://${projectPath}/materials/${_}`"
-        >
-      </el-scrollbar>
+      <NFTPreview :components="componentList" :path="materialPath" :white-list="whiteList" />
     </el-main>
   </el-container>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue';
 import { ElMessage } from 'element-plus';
-import { ref } from 'vue';
+import ComponentEditor from '../components/ComponentEditor.vue';
+import NFTPreview from '../components/NFTPreview.vue';
+import { NFTProject, NFTProjectObject } from '../model/generator';
+import { IComponent } from '/@/model/nft';
 
-const basePath = window.location.href;
-const materials = ref<string[]>([]);
-const projectName = ref('请选择项目...');
-const projectPath = ref('');
-const openProject = (proj?: string) => {
-  window.monobroow.openProject(proj)
+
+let project = new NFTProject('请选择项目...', '')
+const projResp = ref<NFTProjectObject>(project)
+const projectName = computed(() => projResp.value.name);
+const projectPath = computed(() => projResp.value.path);
+const materialPath = computed(() => `file://${projectPath.value}/materials`);
+const compGroupNames = computed<string[]>(() => projResp.value.groups.map(item => item.name))
+const selectedGroup = ref('')
+const whiteList = computed(() => {
+  const selgrp = projResp.value.groups.find(item => item.name === selectedGroup.value)
+  return selgrp?.components
+})
+const componentList = ref<IComponent[]>([])
+
+const openProject = (proj: string = '') => {
+  window.monobroow.openProject(proj, {
+    materialPath: NFTProject.materialPath,
+    nftPath: NFTProject.nftPath
+  })
     .then(proj => {
-      console.log('project slected:', proj);
-      if (!proj.canceled && proj.filePaths.length) {
-        projectPath.value = proj.filePaths[0];
-        projectName.value = proj.filePaths[0].split('/').pop();
-        materials.value = proj.filePaths
-          .map((item: string, idx: number) => idx === 0 ? '' : item)
-          .filter((item: string) => !!item);
+      project = new NFTProject()
+      if (!proj.canceled) {
+        project.fromJSON(proj.project)
+
+        projResp.value = project.toJSON()
+        selectedGroup.value = project.groups[0].name
+        componentList.value = project.componentsByGroup(project.groups[0].name)
+        window.localStorage.setItem('project', project.path)
       } else {
         // projectPath.value = '请选择项目...';
+        projResp.value = project.toJSON()
+        selectedGroup.value = ''
+        componentList.value = []
       }
+      console.log('project', projResp.value)
     })
     .catch(err => {
       ElMessage.error(err.toString());
     });
 };
 
-openProject('/Users/zivyuan/GoziLib/Monobroow NFT/nft-studio');
+watch(() => componentList.value, (orderedList: IComponent[]) => {
+  const order = orderedList.map(item => item.name)
+  project.updateComponentOrder(order)
+  window.monobroow.saveProject(project.toJSON())
+})
+
+const updateComponentList = (grp: string) => {
+  componentList.value = project.componentsByGroup(grp)
+}
+
+// Load last project
+const prevProject = window.localStorage.getItem('project')
+openProject(prevProject || '');
 </script>
 
 <style scoped lang="scss">
 .main-container {
   height: 100%;
 }
-.side-nav {
-  background-color: #f1f1f1;
-  padding: 16px;
+
+.header-container {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
+.header-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+  background-color: #fff;
+
+  > div {
+    flex-shrink: 1;
+  }
+}
+
+.project-info {
+  width: 240px;
+  margin-right: 40px;
+  flex-shrink: 0;
 }
 
 .project-path {
   width: 100%;
+}
+
+.group-selector {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 120px;
+  text-align: center;
 }
 </style>

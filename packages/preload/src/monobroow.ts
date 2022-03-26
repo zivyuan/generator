@@ -1,20 +1,18 @@
 import { exposeInMainWorld } from './exposeInMainWorld';
-import { dialog } from 'electron';
 import { ipcRenderer } from 'electron';
+import type { NFTProjectObject, ProjectPaths } from '../../renderer/src/model/generator';
 
 // Export for types in contracts.d.ts
 export const monobroow = {
-  openProject: async (proj?: string) => {
-    // console.log('.dialog', dialog);
-    // return dialog.showOpenDialog({
-    //   properties: ['openFile', 'openDirectory'],
-    // });
-    return ipcRenderer.invoke('openProject', proj);
+  openProject: async (
+    proj: string,
+    paths: ProjectPaths,
+  ) => {
+    return ipcRenderer.invoke('openProject', proj, paths);
   },
-  listFiles: async () => {
-    return dialog.showOpenDialogSync({
-      properties: ['openFile', 'openDirectory'],
-    });
+  //
+  saveProject: async (proj: NFTProjectObject) => {
+    return ipcRenderer.invoke('saveProject', proj);
   },
 };
 
