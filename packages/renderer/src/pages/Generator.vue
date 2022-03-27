@@ -14,7 +14,9 @@
       </div>
     </el-header>
     <el-main>
-      <NFTPreview :components="componentList" :path="materialPath" :white-list="whiteList" />
+      <NFTPreview :components="componentList" :path="materialPath"
+        :white-list="whiteList"
+        :output="`${outputPath}/${selectedGroup}-`"/>
     </el-main>
   </el-container>
 </template>
@@ -32,6 +34,7 @@ let project = new NFTProject('请选择项目...', '')
 const projResp = ref<NFTProjectObject>(project)
 const projectName = computed(() => projResp.value.name);
 const projectPath = computed(() => projResp.value.path);
+const outputPath = computed(() => projResp.value.path + '/' + projResp.value.nftPath)
 const materialPath = computed(() => `file://${projectPath.value}/materials`);
 const compGroupNames = computed<string[]>(() => projResp.value.groups.map(item => item.name))
 const selectedGroup = ref('')

@@ -14,6 +14,10 @@ export const monobroow = {
   saveProject: async (proj: NFTProjectObject) => {
     return ipcRenderer.invoke('saveProject', proj);
   },
+  //
+  createNFT: async (output: string, sequency: string[]) => {
+    return ipcRenderer.invoke('createNFT', output, sequency);
+  },
 };
 
 exposeInMainWorld('monobroow', monobroow);
