@@ -12,7 +12,7 @@
                   :loading="saveNFTState[ getDNAStr(item.dna) ]" />
               </div>
             </div>
-            <div class="layers" :id="`nft-${getDNAStr(item.dna)}`">
+            <div :class="{layers: true, 'twitter': twitterPfp}" :id="`nft-${getDNAStr(item.dna)}`">
               <img v-for="(comp, imgIdx) in components" :key="imgIdx"
                 :style="`z-index: ${ 100 - imgIdx }`"
                 :src="path + '/' + comp.materials[item.dna[imgIdx]].image" />
@@ -40,6 +40,7 @@ interface IProps {
   path: string
   whiteList?: string[]
   output: string
+  twitterPfp: boolean
 }
 
 const props = withDefaults(defineProps<IProps>(), {
@@ -47,6 +48,7 @@ const props = withDefaults(defineProps<IProps>(), {
   whiteList: () => [],
   path: '',
   output: '',
+  twitterPfp: false,
 })
 
 const totalNft = computed(() => {
@@ -78,7 +80,7 @@ watchEffect(() => {
   nftMul = nftMod.map((item, idx) => {
     return idx === 0 ? 1 : nftMod.slice(0, idx).reduce((a, b) => a*b, 1)
   })
-  const maxNFTCreate = totalNft.value > 1000 ? 1000 : totalNft.value
+  const maxNFTCreate = totalNft.value; // > 1000 ? 1000 : totalNft.value
   const nnfts: INft[] = new Array(maxNFTCreate).fill(0).map((_, idx) => ({
     id: idx,
     dna: getDNA(idx),
@@ -175,8 +177,8 @@ const saveNFT = (dna: number[]) => {
 
     &.twitter {
       clip-path: url("#hex-hw-shapeclip-clipconfig");
-      height: calc(100% - 12px);
-      width: calc(100% - 12px);
+      height: calc(100%);
+      width: calc(100%);
     }
   }
 

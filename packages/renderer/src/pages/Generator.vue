@@ -6,9 +6,16 @@
           <el-button class="project-path" @click="openProject">{{ projectName }}</el-button>
         </div>
         <div class="group-selector">
-          <el-radio-group v-model="selectedGroup" size="small" @change="updateComponentList">
-            <el-radio-button v-for="grp in compGroupNames" :key="grp" :label="grp" />
-          </el-radio-group>
+          <div class="row">
+            <div class="label">分组</div>
+            <el-radio-group v-model="selectedGroup" size="small" @change="updateComponentList">
+              <el-radio-button v-for="grp in compGroupNames" :key="grp" :label="grp" />
+            </el-radio-group>
+          </div>
+          <div class="row">
+            <div class="label">Twitter PFP</div>
+            <el-switch v-model="enableTwitterPfp" />
+          </div>
         </div>
         <ComponentEditor v-model="componentList" class="component-editor" :image-base="materialPath" :white-list="whiteList" />
       </div>
@@ -16,7 +23,8 @@
     <el-main>
       <NFTPreview :components="componentList" :path="materialPath"
         :white-list="whiteList"
-        :output="`${outputPath}/${selectedGroup}-`"/>
+        :output="`${outputPath}/${selectedGroup}-`"
+        :twitter-pfp="enableTwitterPfp" />
     </el-main>
   </el-container>
 </template>
@@ -38,6 +46,7 @@ const outputPath = computed(() => projResp.value.path + '/' + projResp.value.nft
 const materialPath = computed(() => `file://${projectPath.value}/materials`);
 const compGroupNames = computed<string[]>(() => projResp.value.groups.map(item => item.name))
 const selectedGroup = ref('')
+const enableTwitterPfp = ref(false)
 const whiteList = computed(() => {
   const selgrp = projResp.value.groups.find(item => item.name === selectedGroup.value)
   return selgrp?.components
@@ -57,6 +66,7 @@ const openProject = (proj: string = '') => {
         projResp.value = project.toJSON()
         selectedGroup.value = project.groups[0].name
         componentList.value = project.componentsByGroup(project.groups[0].name)
+        enableTwitterPfp.value = project.status.twitterPfP
         window.localStorage.setItem('project', project.path)
       } else {
         // projectPath.value = '请选择项目...';
@@ -74,6 +84,10 @@ const openProject = (proj: string = '') => {
 watch(() => componentList.value, (orderedList: IComponent[]) => {
   const order = orderedList.map(item => item.name)
   project.updateComponentOrder(order)
+  window.monobroow.saveProject(project.toJSON())
+})
+watch(() => enableTwitterPfp.value, (enable: boolean) => {
+  project.status.twitterPfP = enableTwitterPfp.value
   window.monobroow.saveProject(project.toJSON())
 })
 
@@ -119,8 +133,30 @@ openProject(prevProject || '');
 .group-selector {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  width: 120px;
-  text-align: center;
+  justify-content: flex-start;
+  width: 280px;
+  align-items: center;
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+
+    &+.row {
+      margin-top: 0.8em;
+    }
+  }
+
+  .label {
+    width: 90px;
+    margin-right: 0.6em;
+    text-align: right;
+    flex-shrink: 0;
+
+    &:after {
+      content: ':';
+    }
+  }
 }
 </style>

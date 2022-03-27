@@ -4,6 +4,7 @@ import type { IComponent, IComponentGroup, IMaterial, INft } from './nft';
 export interface INFTProjectStatus {
   group: string;
   bucket: INft[];
+  twitterPfP: boolean;
 }
 
 export interface INFTProject {
@@ -92,6 +93,7 @@ const projectFromImages = (imageList: string[]): NFTProjectObject => {
     status: {
       group: '',
       bucket: [],
+      twitterPfP: false,
     },
   };
 };
@@ -114,6 +116,7 @@ export class NFTProject implements INFTProject {
   status: INFTProjectStatus = {
     group: '',
     bucket: [],
+    twitterPfP: false,
   };
 
   constructor(name?: string, path?: string, images?: string[]) {
