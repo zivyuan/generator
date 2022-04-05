@@ -34,11 +34,21 @@ export default defineConfig(configEnv => {
       target: `chrome${chrome}`,
       outDir: 'dist',
       assetsDir: '.',
+      // 最大块大小
+      chunkSizeWarningLimit: 10240,
       rollupOptions: {
         input: join(PACKAGE_ROOT, 'index.html'),
         external: [
           ...builtinModules.flatMap(p => [p, `node:${p}`]),
         ],
+        output: {
+          // 拆分更小的块
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return id.toString().split('node_modules/')[1].split('/')[0].toString()
+            }
+          }
+        }
       },
       emptyOutDir: true,
       brotliSize: false,
