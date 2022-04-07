@@ -80,7 +80,7 @@ watchEffect(() => {
   nftMul = nftMod.map((item, idx) => {
     return idx === 0 ? 1 : nftMod.slice(0, idx).reduce((a, b) => a*b, 1)
   })
-  const maxNFTCreate = totalNft.value; // > 1000 ? 1000 : totalNft.value
+  const maxNFTCreate = 1000; // totalNft.value; // > 1000 ? 1000 : totalNft.value
   const nnfts: INft[] = new Array(maxNFTCreate).fill(0).map((_, idx) => ({
     id: idx,
     dna: getDNA(idx),

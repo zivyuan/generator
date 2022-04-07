@@ -24,7 +24,7 @@ export interface INFTProject {
   updateComponentOrder(order: string[]): void;
   fromImages(images: string[]): void;
   fromJSON(json: any): void;
-  toJSON(): NFTProjectObject;
+  toObject(): NFTProjectObject;
 }
 
 export type NFTProjectObject = Pick<
@@ -42,17 +42,16 @@ const projectFromImages = (imageList: string[]): NFTProjectObject => {
   const groups: IComponentGroup[] = [];
 
   const materials = imageList.map((image: string) => {
-    const parts = image.replace(/[-_]/g, '-').split('-');
+    const parts = image.slice(0, -4).replace(/[-_]/g, '-').split('-');
     const material: IMaterial = {
-      displayName: parts[0].toUpperCase(),
+      displayName: parts[0].replace(/\b(\w)/g, _ => _.toUpperCase()),
       name: parts[0].toUpperCase(),
       image: image,
-      component: parts[0],
+      component: parts[0].toLowerCase(),
       group: parts[1].toUpperCase(),
-      ssr: /^ssr$/i.test(parts[2]),
-      index: 0,
+      ssr: /^ssr$/i.test(parts[3]),
+      index: parseInt(parts[2]),
     };
-    material.index = parseInt(parts[material.ssr ? 3 : 2]);
     if (material.group === 'NA') material.group = '';
 
     let comp = comps.find(item => item.name === material.component);
@@ -191,7 +190,7 @@ export class NFTProject implements INFTProject {
     }
   }
 
-  toJSON(): NFTProjectObject {
+  toObject(): NFTProjectObject {
     const _this: any = this;
     const json: any = jsonProperties.reduce((a: any, b: any) => (a[b] = _this[b]) && a, {});
     return json;

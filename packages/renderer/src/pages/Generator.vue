@@ -59,22 +59,22 @@ const openProject = (proj: string = '') => {
     nftPath: NFTProject.nftPath
   })
     .then(proj => {
+      console.log('proj open complete: ', proj)
       project = new NFTProject()
       if (!proj.canceled) {
         project.fromJSON(proj.project)
 
-        projResp.value = project.toJSON()
-        selectedGroup.value = project.groups[0].name
-        componentList.value = project.componentsByGroup(project.groups[0].name)
-        enableTwitterPfp.value = project.status.twitterPfP
-        window.localStorage.setItem('project', project.path)
+        projResp.value = project.toObject()
+        // selectedGroup.value = project.groups[0].name
+        // componentList.value = project.componentsByGroup(project.groups[0].name)
+        // enableTwitterPfp.value = project.status.twitterPfP
+        // window.localStorage.setItem('project', project.path)
       } else {
-        // projectPath.value = '请选择项目...';
-        projResp.value = project.toJSON()
-        selectedGroup.value = ''
-        componentList.value = []
+        // projResp.value = project.toObject()
+        // selectedGroup.value = ''
+        // componentList.value = []
       }
-      console.log('project', projResp.value)
+      console.log('project', proj)
     })
     .catch(err => {
       ElMessage.error(err.toString());
@@ -84,11 +84,11 @@ const openProject = (proj: string = '') => {
 watch(() => componentList.value, (orderedList: IComponent[]) => {
   const order = orderedList.map(item => item.name)
   project.updateComponentOrder(order)
-  window.monobroow.saveProject(project.toJSON())
+  window.monobroow.saveProject(project.toObject())
 })
 watch(() => enableTwitterPfp.value, (enable: boolean) => {
   project.status.twitterPfP = enableTwitterPfp.value
-  window.monobroow.saveProject(project.toJSON())
+  window.monobroow.saveProject(project.toObject())
 })
 
 const updateComponentList = (grp: string) => {
@@ -97,7 +97,7 @@ const updateComponentList = (grp: string) => {
 
 // Load last project
 const prevProject = window.localStorage.getItem('project')
-openProject(prevProject || '');
+// openProject(prevProject || '');
 </script>
 
 <style scoped lang="scss">
