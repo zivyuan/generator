@@ -1,4 +1,5 @@
 import { ElMessage } from 'element-plus';
+import { componentSizes } from 'element-plus/es/constants';
 import type { IComponent, IComponentGroup, IMaterial, INft } from './nft';
 
 export interface INFTProjectStatus {
@@ -23,6 +24,9 @@ export interface INFTProject {
   componentsByGroup(group: string): IComponent[];
   updateComponentOrder(order: string[]): void;
   fromImages(images: string[]): void;
+  getMaterial(code: number | string): IMaterial | undefined;
+  getComponent(code: number | string): IComponent | undefined;
+  getGroup(name: number | string): IComponentGroup | undefined;
   fromJSON(json: any): void;
   toObject(): NFTProjectObject;
 }
@@ -41,9 +45,10 @@ const projectFromImages = (imageList: string[]): NFTProjectObject => {
   const comps: IComponent[] = [];
   const groups: IComponentGroup[] = [];
 
-  const materials = imageList.map((image: string) => {
+  const materials = imageList.map((image: string, matIndex: number) => {
     const parts = image.slice(0, -4).replace(/[-_]/g, '-').split('-');
     const material: IMaterial = {
+      code: parts[0].toLowerCase().replace(/[^\w\d-_]+/g, '_'),
       displayName: parts[0].replace(/\b(\w)/g, _ => _.toUpperCase()),
       name: parts[0].toUpperCase(),
       image: image,
@@ -65,7 +70,7 @@ const projectFromImages = (imageList: string[]): NFTProjectObject => {
       };
       comps.push(comp);
     }
-    comp.materials.push(material);
+    comp.materials.push(matIndex);
 
     if (material.group) {
       let group = groups.find(item => item.name === material.group);
@@ -79,6 +84,11 @@ const projectFromImages = (imageList: string[]): NFTProjectObject => {
     }
 
     return material;
+  });
+
+  const compList = comps.map(comp => comp.code);
+  groups.forEach(group => {
+    group.components = Array.from(compList);
   });
 
   return {
@@ -133,12 +143,13 @@ export class NFTProject implements INFTProject {
   }
 
   componentsByGroup(group: string): IComponent[] {
-    if (!group) return [];
+    const grp = this.groups.find(item => item.name === group)
+    if (!grp) return [];
 
-    return this.components.map(comp => {
-      const nc: IComponent = JSON.parse(JSON.stringify(comp));
-      nc.materials = nc.materials.filter(item => item.group === '' || item.group === group);
-      return nc;
+    return grp.components.map(compName => {
+      const comp = this.getComponent(compName)
+      const cpy: IComponent = JSON.parse(JSON.stringify(comp))
+      return cpy;
     });
   }
 
@@ -149,6 +160,30 @@ export class NFTProject implements INFTProject {
     }
     this.components = comp;
     this.lastModifyDate = new Date();
+  }
+
+  getMaterial(code: number | string): IMaterial | undefined {
+    if (typeof code === 'number') {
+      return this.materials[code];
+    } else {
+      return this.materials.find(item => item.code === code || item.name === code);
+    }
+  }
+
+  getComponent(code: number | string): IComponent | undefined {
+    if (typeof code === 'number') {
+      return this.components[code]
+    } else {
+      return this.components.find(item => item.code === code || item.name === code);
+    }
+  }
+
+  getGroup(name: number | string): IComponentGroup | undefined {
+    if (typeof name === 'number') {
+      return this.groups[name]
+    } else {
+      return this.groups.find(item => item.name === name)
+    }
   }
 
   fromJSON(json: any) {
@@ -179,7 +214,7 @@ export class NFTProject implements INFTProject {
           (item): IComponentGroup => ({
             displayName: item as unknown as string,
             name: item as unknown as string,
-            components: (<string[]>[]).concat(complist)
+            components: (<string[]>[]).concat(complist),
           })
         );
       }

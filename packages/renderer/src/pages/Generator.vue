@@ -59,22 +59,21 @@ const openProject = (proj: string = '') => {
     nftPath: NFTProject.nftPath
   })
     .then(proj => {
-      console.log('proj open complete: ', proj)
       project = new NFTProject()
       if (!proj.canceled) {
         project.fromJSON(proj.project)
 
         projResp.value = project.toObject()
-        // selectedGroup.value = project.groups[0].name
-        // componentList.value = project.componentsByGroup(project.groups[0].name)
-        // enableTwitterPfp.value = project.status.twitterPfP
-        // window.localStorage.setItem('project', project.path)
+        selectedGroup.value = project.groups[0].name
+        componentList.value = project.componentsByGroup(project.groups[0].name)
+        enableTwitterPfp.value = project.status.twitterPfP
+        window.localStorage.setItem('project', project.path)
       } else {
-        // projResp.value = project.toObject()
-        // selectedGroup.value = ''
-        // componentList.value = []
+        projResp.value = project.toObject()
+        selectedGroup.value = ''
+        componentList.value = []
       }
-      console.log('project', proj)
+      console.log('proj open complete: ', project)
     })
     .catch(err => {
       ElMessage.error(err.toString());
@@ -97,7 +96,7 @@ const updateComponentList = (grp: string) => {
 
 // Load last project
 const prevProject = window.localStorage.getItem('project')
-// openProject(prevProject || '');
+openProject(prevProject || '');
 </script>
 
 <style scoped lang="scss">

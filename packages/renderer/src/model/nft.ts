@@ -5,6 +5,8 @@
  * {component}-{group}-[{SSR}]-{index}.png
  */
 export interface IMaterial {
+  code: string
+  //
   displayName: string
   // 默认为素材文件名
   name: string
@@ -19,6 +21,9 @@ export interface IMaterial {
   index: number
   // 是否禁用
   disabled?: boolean
+  //
+  excludeMaterials?: number[]
+  excludeComponents?: number[]
 }
 
 /**
@@ -28,9 +33,11 @@ export interface IComponent {
   displayName: string
   name: string
   code: string
-  materials: IMaterial[]
+  materials: number[]
   order: number
   thumb?: string
+  excludeMaterials?: number[]
+  excludeComponents?: number[]
 }
 
 export interface IComponentGroup {
