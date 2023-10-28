@@ -50,6 +50,7 @@ export const normalizeMaterials = (source: string, output: string) => {
       group = 'NA';
     }
     comp.push({
+      code: '',
       displayName: matName,
       // 默认为素材文件名
       name: compName,
@@ -68,7 +69,7 @@ export const normalizeMaterials = (source: string, output: string) => {
   });
 
   if (fs.existsSync(output)) {
-    fs.rmSync(output, { recursive: true })
+    fs.rmSync(output, { recursive: true });
   }
   fs.mkdirSync(output, { recursive: true });
 
@@ -81,7 +82,7 @@ export const normalizeMaterials = (source: string, output: string) => {
     }
 
     matList.forEach(mat => {
-      const filename = [mat.component, mat.group, ('00' + mat.index).slice(-2), mat.ssr ? 'SSR' : ''].filter(item => !!item).join('-')
+      const filename = [mat.component, mat.group, ('00' + mat.index).slice(-2), mat.ssr ? 'SSR' : ''].filter(item => !!item).join('-');
       const src = path.join(source, mat.image);
       const trg = path.join(compPath, filename + '.png');
 
